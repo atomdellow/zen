@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Display Stats Canada Data</title>
+  </head>
+  <body>
+    <header>
+      <h1>Reading Data from XML Files</h1>
+    </header>
+    <main>
+      <ul id="cubes"></ul>
+      <pre id="output"></pre>
+    </main>
+  
+    <script>
+      document.addEventListener('DOMContentLoaded', ()=>{
+        let url = "/xml/20220520.xml"
+        fetch(url)
+        .then(response=>response.text())
+        .then(data=>{
+          let parser = new DOMParser();
+          let xml = parser.parseFromString(data, "application/xml");
+          document.getElementById('output').textContent = data;
+          console.log(xml);
+          buildStatsCanSchema(xml);
+        });
+      })
+      function buildStatsCanSchema(x){
+       let list = document.getElementById("cubes");
+       let cubes = document.getElementsByTagName("cubeTitleEn");
+       for(let i=0; i<cubes.length; i++){
+         let li = document.createElement('li');
+         let cube = cubes[i].firstChild.nodeValue;
+         li.textContent =  cube;
+         list.appendChild(li);
+       }
+      }
+    </script>
+  </body>
+</html>

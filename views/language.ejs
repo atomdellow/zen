@@ -1,0 +1,37 @@
+
+<%- include("headerbar"); -%>
+<div class="spacer" style="height:50px;"></div>
+<div class="container d-flex justify-content-center border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 500px;">
+  <div class="syntax-container">
+    <h1>Programming Language</h1><br>
+    <p style="word-wrap: break-word; width: 300px;"> This will be where I have reference to syntax in a quick and manageable
+    way, in that I'll be able to reverse looked up syntax of other languages,
+    and refer to templates for quick execution of code spanning multiple languages,
+    or in learning new languages.  </p><br>
+    <a href="/compose_syntax">Create New entries</a><br>
+    <script type="text/javascript">
+      //document.getElementById('category').addEventListener("click", fired());
+      function fired(){
+        console.log("fired");
+      }
+    </script>
+    <%  syntaxes.forEach(function(syntax){ %>
+    <h1><%=syntax.title%></h1>
+    <p>
+    <%=syntax.content.substring(0, 100) + " ..."%>
+    <a href="/syntaxes/<%=syntax._id%>">Read More</a>
+    </p>
+    <% }) %>
+    <br>
+    <label>Select LookUp Type</label><br>
+    <select id="selectBox" onchange="changeFunc(value);" style="width: 150px;">
+      <option value="1" id="reverse">Reverse</option>
+      <option value="2" id="category">Category</option>
+      <option value="3" id="tag">Tag</option>
+    </select>
+    <br>
+    <label>Lookup</label><br>
+    <input class="form-control" type="text" name="lookupReverse" style="width: 150px;">
+  </div>
+</div>
+<%- include("partials/footer"); -%>

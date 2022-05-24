@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>json beautify</title>
+  </head>
+  <body>
+    <div class="container">
+      <form class="converter" action="jsonbeautify.html" method="post">
+        <textarea name="json-input" rows="8" cols="80" id="json-input"></textarea>
+        <textarea name="json-output" rows="8" cols="80" id="json-output"></textarea>
+        <button type="button" name="button" id="json-converter" onclick="convertJSON();">Convert Raw JSON</button>
+      </form>
+    </div>
+    <script type="text/javascript">
+      const comma = ',';
+      const breakLine = "\n";
+
+
+      function convertJSON(){
+        console.log(document.getElementById("json-input").value);
+        console.log("running ConverJSON Function!");
+        var textValue = document.getElementById("json-input").value;
+        function splitString(stringToSplit, separator) {
+
+          console.log("inside string");
+          const arrayOfStrings = stringToSplit.split(separator);
+          arrayOfStrings.join(breakLine);
+          console.log(arrayOfStrings);
+        }
+        document.getElementById("json-output").value = splitString(textValue, "<br>");
+      }
+    </script>
+  </body>
+</html>

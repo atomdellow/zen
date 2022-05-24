@@ -1,0 +1,42 @@
+
+<%- include("headerbar"); -%>
+<div class="justify-content-center d-flex flex-column container border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 580px;">
+  <h1>Compose Blog Post</h1>
+  <form class="composeForm" action="/compose_post" method="post">
+    <div class="form-group">
+      <label>Title</label>
+      <input class="form-control" type="text" name="postTitle">
+      <label>Content</label>
+      <textarea class="form-control" name="postBody" rows="5" cols="30"></textarea>
+      <div class="richText">
+        <button class="btn btn-primary" type="text" name="bold">B</button>
+        <button class="btn btn-primary" type="text" name="italic">I</button>
+        <button class="btn btn-primary" type="text" name="underline">U</button>
+        <button class="btn btn-primary" type="text" name="strikethrough">S</button>
+        <button class="btn btn-primary" type="text" name="link">Link</button>
+        <button class="btn btn-primary" type="text" name="image">Img</button>
+        <button class="btn btn-primary" type="text" name="quote">" "</button>
+        <button class="btn btn-primary" type="text" name="color">Color</button>
+        <button class="btn btn-primary" type="text" name="HTML">HTML</button>
+      </div>
+      <label>Tags</label>
+      <textarea class="form-control" name="postTags" rows="1" cols="30"></textarea>
+      <label>Category</label>
+      <textarea class="form-control" name="postCategory" rows="1" cols="30"></textarea>
+      <label>Featured</label>
+      <input type="radio" id="featuredRadio">
+      <br/>
+      <label>Hero Image</label>
+      <br/>
+      <label>Multimedia</label>
+      <br/>
+      <label>Embedded HTML</label>
+      <br/>
+      <textarea class="form-control" name="postEmbeddedHTML" rows="5" cols="30"></textarea>
+
+    </div>
+    <button class="btn btn-primary" type="submit" name="draft">Save Draft</button>
+    <button class="btn btn-primary" type="submit" name="button">Publish</button>
+  </form>
+</div>
+<%- include("partials/footer"); -%>

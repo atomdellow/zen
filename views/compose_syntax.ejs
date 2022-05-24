@@ -1,0 +1,43 @@
+
+<%- include("headerbar"); -%>
+<div class="container justify-content-center border-downer-radius d-flex flex-column" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 500px;">
+  <h1>Compose Syntax </h1>
+  <form class="composeForm" action="/compose_syntax" method="post">
+    <div class="form-group">
+      <label>Syntax Name</label>
+      <input class="form-control" type="text" name="postTitle">
+
+      <div>
+        <label>Programming Language</label>
+        <select id="selectBox" onchange="changeFunc(value);">
+          <option value="0" id="default">Select Language</option>
+          <option value="3" id="cee">C</option>
+          <option value="3" id="ceeplusplus">C++</option>
+          <option value="2" id="ceesharp">C#</option>
+          <option value="3" id="python">Python</option>
+          <option value="3" id="java">Java</option>
+          <option value="3" id="kotlin">Kotlin</option>
+          <option value="3" id="ruby">Ruby</option>
+          <option value="3" id="lua">Lua</option>
+          <option value="3" id="perl">Perl</option>
+          <option value="1" id="javascript">Javascript</option>
+          <option value="1" id="jquery">Jquery</option>
+          <option value="1" id="bootstrap">Bootstrap</option>
+          <option value="1" id="react">React</option>
+          <option value="3" id="nodedotjayess">Node.js</option>
+          <option value="3" id="laravel">Laravel</option>
+          <option value="3" id="java">Java</option>
+        </select>
+      </div>
+
+      <label>Syntax Content</label>
+      <textarea class="form-control" name="postBody" rows="5" cols="30"></textarea>
+      <label>Description</label>
+      <textarea class="form-control" name="postDescription" rows="5" cols="30"></textarea>
+      <label>Tags</label>
+      <textarea class="form-control" name="postTags" rows="5" cols="30">separate by commas</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit" name="button">Publish</button>
+  </form>
+</div>
+<%- include("partials/footer"); -%>

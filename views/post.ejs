@@ -1,0 +1,77 @@
+
+<%- include("headerbar"); -%>
+<div class="spacer" style="height:50px;"></div>
+<div class="justify-content-center container border-downer-radius d-flex" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 500px;">
+  <form class="saveEdit" action="/posts/:postId" method="post">
+   <div class="postTitle edit" contentEditable="false" id="edit">
+     <h1 class="title" id="edit" name="postTitle"><%=title%></h1>
+   </div>
+   <div class="postBody edit" id="edit" contentEditable="false">
+     <p id="edit" class="body" name="postBody"><%=content%></p>
+   </div>
+   <div class="postAuthor">
+     <p name="postAuthor"><%=author%></p>
+   </div>
+   <div class="postDateCreated">
+     <p name="postDateCreated"><%=dateCreated%></p>
+   </div>
+   <div class="postLastUpdated">
+     <p name="postLastCreated"><%=lastUpdated%></p>
+   </div>
+   <div class="postTags edit">
+     <p name="postTags"><%=tags%></p>
+   </div>
+   <div class="postReactions">
+     <p name="postReactions"><%=reactions%></p>
+   </div>
+   <div class="postMultiMedia edit">
+     <p name="postMultiMedia"><%=multiMedia%></p>
+   </div>
+   <div class="postHeroImage edit">
+     <p name="postHeroImage"><%=heroImage%></p>
+   </div>
+   <div class="postEmbeddedHTML edit">
+     <p name="postEmbeddedHTML"><%=embeddedHTML%></p>
+   </div>
+   <div class="postComments">
+     <p name="postComments"><%=comments%></p>
+   </div>
+   <div class="postCategory edit">
+     <p name="postCategory"><%=category%></p>
+   </div>
+   <div class="postFeatured edit">
+     <p name="postFeatured"><%=featured%></p>
+   </div>
+   <div class="editAndSave">
+       <button type="button" name="edit" onclick="editableFunc()">edit</button>
+       <button type="button" name="button" type="submit" onclick="save()">save content</button>
+   </div>
+ </form>
+</div>
+
+
+<script type="text/javascript">
+  console.log("test fire");
+  function editableFunc(){
+    console.log("Editable Function fired");
+    console.log(document.querySelectorAll("div.edit"));
+    let editable = document.querySelectorAll("div.edit");
+    editable.forEach(editableFunc);
+    function editableFunc(item, index){
+          item.contentEditable = "true";
+    }
+  }
+
+  function save(){
+    console.log("saving content to post");
+    let editable = document.querySelectorAll("div.edit");
+    editable.forEach(editableFunc);
+    function editableFunc(item, index){
+          item.contentEditable = "false";
+    }
+  }
+</script>
+
+
+
+<%- include("partials/footer"); -%>
