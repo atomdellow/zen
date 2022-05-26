@@ -446,7 +446,7 @@ app.get('/weather', function(req, res){
 });
 //NASA IMAGES
 app.get('/nasa', function(req, res){
-  const url = "https://api.nasa.gov/planetary/apod?api_key=BwrhOK3cDES8YxBHADqnLwcVgmZx6uZxo3ZhJhEs";
+  const url = process.env.nasaAPI;
    https.get(url, function(response){
     console.log(response.statusCode);
     response.on("data", function(data){
