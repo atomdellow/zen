@@ -96,7 +96,9 @@ passport.deserializeUser(function(id, done) {
 });
 ///////////////
 //O-Auth Usage
+
 passport.use(new GoogleStrategy({
+
     clientID: process.env.clientID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
