@@ -97,7 +97,7 @@ passport.deserializeUser(function(id, done) {
 ///////////////
 //O-Auth Usage
 passport.use(new GoogleStrategy({
-    clientId: process.env.CLIENT_ID,
+    clientID: process.env.clientID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -786,6 +786,11 @@ app.get('/jsonbeautify',function(req,res){
 app.get('/statscanxml',function(req,res){
   res.sendFile((path.join(__dirname + '/public/html/xml-data-viewer/statscan.html')));
 });
+
+
+
+
+
 ///////////////////////
 //App listens on Port
 /////////////////////
