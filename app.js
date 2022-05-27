@@ -10,7 +10,7 @@ const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const app = express();
 const connectDB = process.env.DB_CONNECT;
-const port = process.env.PORT || 80;
+
 const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
@@ -789,6 +789,13 @@ app.get('/statscanxml',function(req,res){
 ///////////////////////
 //App listens on Port
 /////////////////////
+
+//Because Heroku is a little bitch, and is very particular with it's bullshit!
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
 app.listen(port, function() {
-  console.log("Server started on port: " +  port);
+  console.log("Server started succesfully");
 });
