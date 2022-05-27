@@ -1,0 +1,24 @@
+
+<%- include("headerbar"); -%>
+<div class="spacer" style="height:50px;"></div>
+<div class="container d-flex justify-content-center border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 500px;">
+  <div class="title justify-content-center">
+      <h1>Blog</h1><br>
+      <p style="word-wrap: break-word;"> As I carry on my programming journey, I'll be documenting
+        it here and going through many highlights of where this adventure
+        carries me. </p><br>
+        <p><a href="/compose_post">Create Blog Post</a></p><br>
+        <div class="posts">
+            <%  posts.forEach(function(post){ %>
+            <h1><%=post.title%></h1>
+            <p>
+            <%=post.content.substring(0, 100) + " ..."%>
+            <a href="/posts/<%=post._id%>">Read More</a>
+            </p>
+            <% }) %>
+        </div>
+  </div>
+</div>
+
+
+<%- include("partials/footer"); -%>
