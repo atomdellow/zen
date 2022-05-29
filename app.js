@@ -101,21 +101,21 @@ passport.deserializeUser(function(id, done) {
 ///////////////
 //O-Auth Usage
 
-passport.use(new GoogleStrategy({
-
-    clientID: process.env.CLIENTID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    console.log(profile);
-
-    User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
+// passport.use(new GoogleStrategy({
+//
+//     clientID: process.env.CLIENTID,
+//     clientSecret: process.env.CLIENT_SECRET,
+//     callbackURL: "http://localhost:3000/auth/google/secrets",
+//     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+//   },
+//   function(accessToken, refreshToken, profile, cb) {
+//     console.log(profile);
+//
+//     User.findOrCreate({ googleId: profile.id }, function (err, user) {
+//       return cb(err, user);
+//     });
+//   }
+// ));
 
 const Post = mongoose.model("Post", postSchema);
 
@@ -170,16 +170,16 @@ var loginLink;
 ////////////////////////////////////////
 //Google Auth Route
 //Authorize Google Sign in with O Auth
-app.get("/auth/google",
-  passport.authenticate('google', { scope: ["profile"] })
-  );
-
-app.get("/auth/google/secrets",
-  passport.authenticate('google', { failureRedirect: "/login" }),
-  function(req, res) {
-    // Successful authentication, redirect to secrets.
-    res.redirect("/secrets");
-    });
+// app.get("/auth/google",
+//   passport.authenticate('google', { scope: ["profile"] })
+//   );
+//
+// app.get("/auth/google/secrets",
+//   passport.authenticate('google', { failureRedirect: "/login" }),
+//   function(req, res) {
+//     // Successful authentication, redirect to secrets.
+//     res.redirect("/secrets");
+//     });
 
 ////////////////////
 //Register Route
