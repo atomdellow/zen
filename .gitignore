@@ -132,3 +132,5 @@ node-modules
 #clone for Heroku
 zen
 
+#automation for Heroku
+deploy.sh
