@@ -26,10 +26,20 @@ const parseString = require('xml2js').parseString;
 
 app.set('view engine', 'ejs');
 
-var xml = "<root>Hello xml2js!</root>"
-parseString(xml, function (err, result) {
-    console.log(JSON.stringify(result));
-});
+// var xml = "<root>Hello xml2js!</root>"
+// parseString(xml, function (err, result) {
+//     console.log(JSON.stringify(result));
+// });
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+}
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.errorHandler());
+}
+
+
 //////////////////////////////
 //Declaring Variables
 ////////////////////////////
