@@ -3,22 +3,36 @@
 <div class="spacer" style="height:50px;"></div>
 <div class="container d-flex justify-content-center border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 500px;">
   <div class="title justify-content-center">
-      <h1>Blog</h1><br>
-      <p style="word-wrap: break-word;"> As I carry on my programming journey, I'll be documenting
-        it here and going through many highlights of where this adventure
-        carries me. </p><br>
-        <p><a href="/compose_post">Create Blog Post</a></p><br>
-        <div class="posts">
+        <div class="container d-flex justify-content-center border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 650px;">
+          <!-- card 1: body -->
+          <div class="card-body">
+            <h5 class="card-title">Blog</h5>
+            <p class="card-text">As I carry on my programming journey, I'll be documenting
+              it here and going through many highlights of where this adventure
+              carries me.</p>
+          </div>
+        </div>
+        <div class="spacer" style="height:50px;"></div>
+        <div class="posts container border-downer-radius" style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 650px;">
             <%  posts.forEach(function(post){ %>
-            <h1><%=post.title%></h1>
-            <p>
-            <%=post.content.substring(0, 100) + " ..."%>
-            <a href="/posts/<%=post._id%>">Read More</a>
-            </p>
+                <div class="spacer" style="height:5px;"></div>
+            <div class="posts container border-downer-radius" style="padding: 10px; background-color: #fff; max-width: 650px;">
+
+              <h1 class="text-dark"><%=post.title%></h1>
+              <p class="text-dark">
+              <%=post.content.substring(0, 100) + " ..."%>
+              <a href="/posts/<%=post._id%>">Read More</a>
+              </p>
+            </div>
             <% }) %>
         </div>
   </div>
 </div>
+<script type="text/javascript">
+  // <div class="loggedIn">
+  //   <a href="/compose_post" class="btn btn-primary">Create Blog Post</a>
+  // </div>
+</script>
 
 
 <%- include("partials/footer"); -%>
