@@ -10,6 +10,9 @@
             <p class="card-text">As I carry on my programming journey, I'll be documenting
               it here and going through many highlights of where this adventure
               carries me.</p>
+              <div class="loggedIn">
+                <!-- <a href="/compose_post" class="btn btn-primary">Create Blog Post</a> -->
+              </div>
           </div>
         </div>
         <div class="spacer" style="height:50px;"></div>
@@ -19,8 +22,12 @@
             <div class="posts container border-downer-radius" style="padding: 10px; background-color: #fff; max-width: 650px;">
 
               <h1 class="text-dark"><%=post.title%></h1>
+              <img src="/uploads/<%=post.heroImage%>" style="max-width: 20rem; max-height: auto; object-fit: cover; padding: 0.75rem;"></img>
+              <!-- <svg class="bd-placeholder-img card-img-top" width="100%" height="180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap" preserveAspectRatio="xMidYMid slice" focusable="false">
+                <rect width="100%" height="100%" fill="#868e96"></rect>
+              </svg> -->
               <p class="text-dark">
-              <%=post.content.substring(0, 100) + " ..."%>
+              <%=post.content.substring(0, 300) + " ..."%>
               <a href="/posts/<%=post._id%>">Read More</a>
               </p>
             </div>
@@ -29,9 +36,7 @@
   </div>
 </div>
 <script type="text/javascript">
-  // <div class="loggedIn">
-  //   <a href="/compose_post" class="btn btn-primary">Create Blog Post</a>
-  // </div>
+
 </script>
 
 

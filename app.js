@@ -6,20 +6,34 @@
 require("dotenv").config();
 const dotenv=require('dotenv');
 const express = require("express");
+const session = require('express-session');
+const app = express();
+const sanitizer = require('sanitize')();
+require('sanitize').middleware;
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
-const app = express();
+const { Schema } = mongoose;
 const connectDB = process.env.DB_CONNECT;
-
-const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
 const https = require('https');
 const parseString = require('xml2js').parseString;
-
+const fs = require('fs');
+const busboy = require('busboy');
+const { randomFillSync } = require('crypto');
+const os = require('os');
+const random = (() => {
+  const buf = Buffer.alloc(16);
+  return () => randomFillSync(buf).toString('hex');
+})();
+const fileUpload = require('express-fileupload');
+const util = require('util');
+//const validateUser = require('../middleware/validation/user.js');
+//const User = require('.models/user');
+const { body, check, validationResult } = require('express-validator');
 //////////////////////////////
 //Setting View Engine
 ////////////////////////////
@@ -30,8 +44,10 @@ app.set('view engine', 'ejs');
 // parseString(xml, function (err, result) {
 //     console.log(JSON.stringify(result));
 // });
-
-
+//
+// const test = [["key1","value1"],["key2","value1"]]
+// console.table(test);
+// console.log("value is: " + test[0][1]);
 
 //////////////////////////////
 //Declaring Variables
@@ -45,6 +61,7 @@ const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rho
 ///////////////////////////////////////////
 //Creating conditions for files and paths
 ////////////////////////////////////////
+const urlEncodedParser = bodyParser.urlencoded({extended: true});
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(express.static('files'))
@@ -56,6 +73,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+app.use(fileUpload());
 
 //////////////////////////////
 //Initializes Passport
@@ -65,26 +83,42 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 const userSchema = new mongoose.Schema ({
-  email: String,
+  //fullname: String,
+  username: String,
   password: String,
+  fullname: String,
   googleId: String,
-  secret: String
+  secret: String,
+  blogPosts: Array,
 });
 
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
-
+const User = new mongoose.model("User", userSchema);
 //////////////////////////////
 //Connect to Mongo Database
 ////////////////////////////
-
+const schema = new Schema({ name: String });
 mongoose.connect(process.env.DB, {useNewUrlParser: true});
-const postSchema = {
+const postSchema = new mongoose.Schema({
   title: String,
-  content: String
-};
-const User = new mongoose.model("User", userSchema);
-
+  content: String,
+  author: String,
+  dateCreated: Date,
+  lastUpdated: Date,
+  tags: Array,
+  reactions: JSON,
+  draft: JSON,
+  previousSaves: JSON,
+  heroImage: String,
+  multiMedia: JSON,
+  embeddedHTML: JSON,
+  comments: JSON,
+  category: String,
+  featured: Boolean,
+  postId: Number
+});
+const Post = new mongoose.model("Post", postSchema);
 //////////////////////////////
 //User Lookup and validate
 ////////////////////////////
@@ -117,7 +151,7 @@ passport.deserializeUser(function(id, done) {
 //   }
 // ));
 
-const Post = mongoose.model("Post", postSchema);
+// const Post = mongoose.model("Post", postSchema);
 
 //Checks if Logged in
 
@@ -184,15 +218,6 @@ var loginLink;
 ////////////////////
 //Register Route
 ////////////////
-    app.get("/register", function(req, res){
-      res.render("register", {
-        yyyy: getDate.getFullYear(),
-            loginhref: "login",
-            login: "LOGIN",
-            loginhref: "profile"});
-    });
-
-
     app.get("/submit", function(req, res){
       if (req.isAuthenticated()){
         res.render("submit", {
@@ -268,21 +293,72 @@ var loginLink;
         }
       });
     });
+    app.get("/register", function(req, res){
+      res.render("register", {
+        yyyy: getDate.getFullYear(),
+        loginhref: "login",
+        login: "LOGIN",
+        loginhref: "profile"
+        });
+    });
     //////////////////////////////////
     //posting route for Registering
-    app.post("/register", function(req, res){
-
-      User.register({username: req.body.username}, req.body.password, function(err, user){
-        if (err) {
-          console.log(err);
-          res.redirect("/register");
-        } else {
-          passport.authenticate("local")(req, res, function(){
-            res.redirect("/secrets");
+    app.post("/register", [
+      check('fullname', 'this cannot be left empty')
+        .exists()
+        .isLength({min: 3})
+        .trim().withMessage('There is some space in the fullname input, instead of characters')
+        .escape(),
+      check('username', "cannot be left empty and must be an email @x.x")
+        .isEmail()
+        .trim().withMessage('There is some space in the email input, instead of characters')
+        .escape()
+        .normalizeEmail(),
+      check('password')
+        .isEmpty()
+        .matches('[0-9]').withMessage('Password Must Contain a Number')
+        .matches('[A-Z]').withMessage('Password Must Contain an Uppercase Letter')
+        .isLength({min: 6, max:30}).withMessage('password must be minimum of 6-30 characters long')
+        .trim().withMessage('There is some space in the password input, instead of characters')
+        .escape(),
+      check('passwordConfirm', 'this password box cannot be left empty')
+        .custom((value, {req})=>{
+            if(value !== req.body.password){
+              throw new Error('Both password must be same!')
+            }
+            return true;
+        })
+      ],
+    (req,res)=>{
+      const errors = validationResult(req);
+      if(!errors.isEmpty()){
+        //return res.status(422).jsonp(errors.array())
+        console.log("fired off User Registration")
+        User.register({
+          username: req.body.username,
+          fullname: req.body.fullname,
+          passwordConfirm: req.body.passwordConfirm
+       }, req.body.password,
+          function(err, user){
+            if (!err) {
+              console.log("no errors, authenticating: ");
+              passport.authenticate("local")(req,res, function(){
+                res.redirect("/secrets");
+              });
+            } else {
+              console.log("some errors, here is some bullshit: ");
+              console.log(err);
+              res.redirect("/register");
+            }
           });
-        }
-      });
-
+      }else{
+        const alert = errors.array();
+        //res.json(req.body);
+        console.log("Validation errors present: ")
+        res.render('register', {
+          alert
+        });
+      }
     });
 /////////////////////////
 //post route for Login
@@ -290,9 +366,9 @@ var loginLink;
 
       const user = new User({
         username: req.body.username,
-        password: req.body.password
+        password: req.body.password,
       });
-
+      console.log(req.body.username, req.body.password);
       req.login(user, function(err){
         if (err) {
           console.log(err);
@@ -329,7 +405,7 @@ app.get("/blog", function(req, res){
 
   Post.find({}, function(err, posts){
     res.render("blog", {
-      startingContent: homeStartingContent,
+      startingContent: "some content",
       posts: posts,
       loginhref: "profile",
       login: "PROFILE",
@@ -367,7 +443,7 @@ app.get("/language", function(req, res){
 
   Syntax.find({}, function(err, syntaxes){
     res.render("language", {
-      startingContent: homeStartingContent,
+      startingContent: "Some content",
       syntaxes: syntaxes,
       login: "PROFILE",
       loginhref: "profile",
@@ -402,7 +478,7 @@ app.get("/about", function(req, res){
     yyyy: getDate.getFullYear(),
     loginhref: "login",
     login: "PROFILE",
-    aboutContent: aboutContent});
+    aboutContent: "aboutContent"});
 });
 /////////////////
 //Contact
@@ -506,23 +582,23 @@ app.get('/dictionary', function(req, res){
 // currently not used**
 // will likely remove
 app.post("/compose", function(req, res){
-  const post = new Post({
-    title: req.body.postTitle,
-    content: req.body.postBody,
-    author: req.body.postAuthor,
-    dateCreated: req.body.postDateCreated,
-    lastUpdated: req.body.postLastUpdated,
-    tags: req.body.postTags,
-    reactions: req.body.postReactions,
-    draft: req.body.postDraft,
-    previousSaves: req.body.postPreviousSaves,
-    heroImage: req.body.postHeroImage,
-    multiMedia: req.body.postMultiMedia,
-    embeddedHTML: req.body.postEmbeddedHTML,
-    comments: req.body.postComments,
-    category: req.body.postCategory,
-    featured: req.body.postFeatured
-  })
+  // const post = new Post({
+  //   title: req.body.postTitle,
+  //   content: req.body.postBody,
+  //   author: req.body.postAuthor,
+  //   dateCreated: req.body.postDateCreated,
+  //   lastUpdated: req.body.postLastUpdated,
+  //   tags: req.body.postTags,
+  //   reactions: req.body.postReactions,
+  //   draft: req.body.postDraft,
+  //   previousSaves: req.body.postPreviousSaves,
+  //   heroImage: req.body.postHeroImage,
+  //   multiMedia: req.body.postMultiMedia,
+  //   embeddedHTML: req.body.postEmbeddedHTML,
+  //   comments: req.body.postComments,
+  //   category: req.body.postCategory,
+  //   featured: req.body.postFeatured
+  // })
   post.save(function(err){
     res.redirect("/");
   });
@@ -562,11 +638,51 @@ app.get("/compose_post", function(req, res){
         loginhref: "profile",
         yyyy: getDate.getFullYear()
       });
+//  res.write("Upload from file");
 });
+
 /////////////////////////////
 //Composing Post, post-route
 ///////////////////////////
-app.post("/compose_post", function(req, res){
+app.post("/compose_post", [
+  check("postTitle")
+    .exists().withMessage("Can't be left empty")
+    .trim().withMessage("Can't be empty or simply contain only spaces")
+    .isLength({min: 6, max: 100}).withMessage("Length needs to be 6-100 characters")
+    .escape(),
+  check("postBody")
+    .exists().withMessage("Can't be left empty")
+    .trim().withMessage("Can't be empty or simply contain only spaces")
+    .isLength({min: 6, max: 2000}).withMessage("Length needs to be 6-2000 characters")
+    .escape(),
+  // check("postTags")
+  //   .trim()
+  //   .escape()
+  //   //custom().withMessage("Needs to be separated by commas")
+  //   ,
+  // check("postCategory")
+  //   .trim()
+  //   .escape()
+],
+(req, res)=>{
+  try {
+    var file = req.files.postFile;
+    var fileName = file.name;
+    var size =  file.data.length;
+    const extension = path.extname(fileName);
+    const allowedExtensions = /png|jpeg|jpg|gif|PNG|JPEG|GIF|JPG/;
+    if(!allowedExtensions.test(extension))throw "unsupported type!";
+    if(size > 5000000)throw "file must be less than 5mb";
+    const  md5 = file.md5;
+    var fileNameExt = md5 + extension;
+    const URL = "/uploads/" + md5 + extension;
+    util.promisify(file.mv)("./public" + URL);
+    console.log("great success, is nice!");
+
+  }catch(err){
+    console.log(err);
+  }
+  console.log("doing a check");
   const post = new Post({
     title: req.body.postTitle,
     content: req.body.postBody,
@@ -576,29 +692,55 @@ app.post("/compose_post", function(req, res){
     tags: req.body.postTags,
     reactions: req.body.postReactions,
     draft: req.body.postDraft,
+    heroImage: fileNameExt,
     previousSaves: req.body.postPreviousSaves,
-    heroImage: req.body.postHeroImage,
-    multiMedia: req.body.postMultiMedia,
     embeddedHTML: req.body.postEmbeddedHTML,
     comments: req.body.postComments,
     category: req.body.postCategory,
     featured: req.body.postFeatured
   });
-  post.save(function(err){
-    res.redirect("/blog");
-  });
-});
-
+  post.save((err)=>{
+    if(!err){
+      console.log("no errors, posting!");
+      res.redirect("/blog")
+    }else{
+      console.log("some errors, reloading compose form!");
+      res.redirect("/compose_post");
+    }
+  })
+  // const errors = validationResult(req);
+  // if(errors.isEmpty()){
+  //   console.log("errors empty! Here is some Info");
+  //   // return res.status(422).jsonp(errors.array())
+  //
+  // }else{
+  //   const alert = errors.array();
+  //   console.log("errors not empty!");
+  //   // loginhref: "login",
+  //   // login: "LOGIN",
+  //   // loginhref: "profile",
+  //   // yyyy: getDate.getFullYear()
+  //   res.render('compose_post', {
+  //     alert: alert,
+  //     yyyy: getDate.getFullYear()
+  //   });
+  //     console.log("rendered res or errors")
+  // };
+})
 ////////////////////////
 //Dynamic Routes
 /////////////////////
 // app.use gets the static images with a different route
 app.use("/posts/:postId", express.static('/public'));
 // dynamic posts, based on Post Id retrieved from database
-app.get("/posts/:postId", function(req, res){
+app.get("/posts/:postId",
+
+function(req, res){
   const requestedPostId = req.params.postId;
+
   Post.findOne({_id: requestedPostId}, function(err, post){
-    res.render("post", {
+      res.render("post", {
+      post: post,
       yyyy: getDate.getFullYear(),
       title: post.title,
       content: post.content,
@@ -609,7 +751,7 @@ app.get("/posts/:postId", function(req, res){
       reactions: post.postReactions,
       draft: post.postDraft,
       previousSaves: post.postPreviousSaves,
-      heroImage: post.postHeroImage,
+      heroImage: post.heroImage,
       multiMedia: post.postMultiMedia,
       embeddedHTML: post.postEmbeddedHTML,
       comments: post.postComments,
@@ -622,7 +764,29 @@ app.get("/posts/:postId", function(req, res){
   });
 });
 // post request for dynamic post routes
-app.post("/post/:postId", function(req, res){
+app.post("/post/:postId",  [
+  check("title")
+    .exists().withMessage("Can't be left empty")
+    .trim().withMessage("Can't be empty or simply contain only spaces")
+    .isLength({min: 6, max: 100}).withMessage("Length needs to be 6-100 characters")
+    .escape(),
+  check("content")
+    .exists().withMessage("Can't be left empty")
+    .trim().withMessage("Can't be empty or simply contain only spaces")
+    .isLength({min: 6, max: 2000}).withMessage("Length needs to be 6-2000 characters")
+    .escape(),
+  check("tags")
+    .trim()
+    .escape()
+    //custom().withMessage("Needs to be separated by commas")
+    ,
+  check("category")
+    .trim()
+    .escape(),
+  check("file")
+
+],
+function(req, res){
   const requestedPostId = req.params.postId;
   console.log("post updated: " + req.params.postId);
   const post = req.params.postId({
@@ -639,6 +803,7 @@ app.post("/post/:postId", function(req, res){
     multiMedia: req.body.postMultiMedia,
     embeddedHTML: req.body.postEmbeddedHTML
   });
+
   // post route updates database
   post.updateOne(function(err){
     res.redirect("/blog");
@@ -776,6 +941,11 @@ app.route("/articles/:articleTitle")
 //////// STATIC PAGES ////////////////////////////////////
 ////////////////////////////////////////////////////////
 
+app.use('/static', express.static(path.join(__dirname, 'public')))
+
+app.get('/imagetest',function(req,res){
+  res.sendFile((path.join(__dirname + '/public/html/testing/imagetest.html')));
+});
 app.get('/bootstrap',function(req,res){
   res.sendFile((path.join(__dirname + '/public/html/templates/webdesigns/bootstrap.html')));
 });
@@ -793,9 +963,30 @@ app.get('/statscanxml',function(req,res){
   res.sendFile((path.join(__dirname + '/public/html/xml-data-viewer/statscan.html')));
 });
 
+/////////////////////////////////////////////
+// INPUT TEST
+/////////////////////////////////////////
+var input = "";
+app.get('/inputtest',function(req,res){
+  res.sendFile((path.join(__dirname + '/public/html/testing/input-sanitize.html')));
+});
 
+app.post('/inputtest',function(req,res){
+  res.sendFile((path.join(__dirname + '/public/html/testing/input-sanitize.html')));
+});
 
+///////////////////////
+// ejs version
 
+app.get("/test-input", function(req, res){
+    res.render("test-input");
+});
+
+app.post("/test-input", function(req, res){
+  let input = req.body.input1;
+  console.log("Input is: " + input);
+  res.redirect("/test-input");
+});
 
 ///////////////////////
 //App listens on Port

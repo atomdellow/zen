@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>test for js</title>
+
+</head>
+
+
+<body id="body">
+  <div id="div">
+    <p id="generator">0</p>
+  </div>
+
+    <script id="script">
+        console.log("starting: ");
+        var pVal = document.getElementById("generator").innerHTML;
+        for(var i=0; i<10; i++){
+            pVal = i;
+            console.log(pVal);
+          };
+let container = document.createElement("div");
+let p = document.createElement("p");
+container.appendChild(p);
+let span = document.createElement("span");
+
+p.after(container, "Text");
+console.log(container.outerHTML);
+     </script>
+</body>
+</html>
