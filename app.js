@@ -52,8 +52,65 @@ app.set('view engine', 'ejs');
 //////////////////////////////
 //Declaring Variables
 ////////////////////////////
+
+////\________________/````/
+// working with the Date /
+
 var getDate = new Date();
 var yyyy = getDate.getFullYear();
+function currentTime(){
+  let timeStandard = getDate.getHours() ;
+  //time of day
+  const monthNumber = getDate.getDate();
+  let timeOfDay ={timeOfDayShort: "",timeOfDayLong: ""}
+  if(getDate.getHours()<=11){
+    timeOfDay = {timeOfDayShort: "am",timeOfDayLong: "morning"}
+  }else if (getDate.getHours()<=17) {
+    timeOfDay = {timeOfDayShort: "pm",timeOfDayLong: "afternoon"}
+  }else if(getDate.getHours()<=23){
+    timeOfDay = {timeOfDayShort: "pm",timeOfDayLong: "evening"}
+  }
+  //which day
+  let day;
+  switch (getDate.getDay()) {
+    case 0: day = "Sunday";    break;
+    case 1: day = "Monday";    break;
+    case 2: day = "Tuesday";   break;
+    case 3: day = "Wednesday"; break;
+    case 4: day = "Thursday";  break;
+    case 5: day = "Friday";    break;
+    case 6: day = "Saturday";
+  }
+
+  let hour = getDate.getHours();
+  let minutes = getDate.getMinutes();
+  // Date of hour, minute, seconds, time of day (AM/PM)
+  let i
+  let time = ((hour < 10)? hour = "0" + hour : hour = hour) + ":" + (minutes < 10? minutes = "0" + minutes: minutes = minutes) + ":" + getDate.getSeconds() +" " + timeOfDay.timeOfDayShort
+  // Date of Day, Month, and Year
+  let date = monthNumber + "/" + "/" +  getDate.getFullYear();
+
+  //take time stamp strings and extract the time from them.
+  function timeStampRead(time){
+    let timePattern = new RegExp(/[0-9][0-9]:[0-9][0-9]:[0-9][0-9]/ig)
+    return time.match(timePattern)
+
+  }
+
+  function readTime(){
+
+    function dateStampRead(){
+
+    }
+  }
+
+
+  return timeStampRead(time)
+}
+
+
+
+
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
 const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
@@ -503,7 +560,14 @@ app.get("/compose", function(req, res){
     yyyy: getDate.getFullYear()
   });
 });
-
+app.get("/task", function(req, res){
+  res.render("task", {
+    login: "PROFILE",
+    loginhref: "profile",
+    yyyy: getDate.getFullYear(),
+    currentTime: currentTime()
+  });
+});
 ////////////////////////////////////////
 // API site examples
 /////////////////////////////////////
