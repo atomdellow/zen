@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+   <url>
+
+      <loc>http://www.zen-app.ca</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+
+   <url>
+
+      <loc>http://www.zen-app.ca/templates</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/templates-nav</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/apps</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/blog</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/about</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/register</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   <url>
+
+      <loc>http://www.zen-app.ca/posts/:postId</loc>
+
+      <lastmod>2022-06-07</lastmod>
+
+      <changefreq>weekly</changefreq>
+
+      <priority>1</priority>
+
+   </url>
+   
+</urlset>

@@ -34,6 +34,14 @@ const util = require('util');
 //const validateUser = require('../middleware/validation/user.js');
 //const User = require('.models/user');
 const { body, check, validationResult } = require('express-validator');
+const accountSid = process.env.TWILIO_ACCT;
+const authToken = process.env.TWILIO_KEY;
+const client = require('twilio')(accountSid, authToken);
+const Twilio = require('twilio');
+const twilio = new Twilio(accountSid, authToken);
+const nodemailer = require('nodemailer');
+const mailchimpTx = require("@mailchimp/mailchimp_transactional")(process.env.MAILCHIMP_KEY);
+// const authRouter = require("./auth");
 //////////////////////////////
 //Setting View Engine
 ////////////////////////////
@@ -55,7 +63,9 @@ app.set('view engine', 'ejs');
 
 ////\________________/````/
 // working with the Date /
-
+//var ipaddress = req.socket.remoteAddress;
+//console.log(ipaddress);
+var admin = true;
 var getDate = new Date();
 var yyyy = getDate.getFullYear();
 function currentTime(){
@@ -108,7 +118,12 @@ function currentTime(){
   return timeStampRead(time)
 }
 
+///////////////////
+//mailchimp
+///////////////
+f = () => {
 
+}
 
 
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -139,14 +154,24 @@ app.use(fileUpload());
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.isAuthenticated();
+  next();
+});
 const userSchema = new mongoose.Schema ({
   //fullname: String,
   username: String,
   password: String,
+  firstname: String,
+  lastname: String,
   fullname: String,
   googleId: String,
   secret: String,
   blogPosts: Array,
+  role: String,
+  joindate: String,
+  lastactive: Array,
+  ip: String
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -238,22 +263,36 @@ function checkLogin(req, res, next) {
 //////////////////////////////
 //Setting Up Routes
 ////////////////////////////
+
 // Home Route
 app.get("/", checkLogin, function(req, res){
+  try {
+    console.log(req.ip)
+    // let userRole = req.user.role
+    // let role = req.user.roleObject.values(req.user.role)
     if (req.currentUser) {
       res.render("home.ejs", {
         login: 'PROFILE',
         loginhref: "profile",
-        yyyy: getDate.getFullYear()
+        yyyy: getDate.getFullYear(),
+        userRole: req.user.role
       });
 
-  } else {
+    } else {
       res.render("home.ejs", {
       login: 'LOGIN',
       loginhref: "login",
-      yyyy: getDate.getFullYear()
+      yyyy: getDate.getFullYear(),
       })
     }
+  } catch (e) {
+    console.log(e)
+  } finally {
+
+  }
+
+  //console.log("User logged in: " + res.locals.isAuthenticated)
+
   });
 
 var loggedIn = false;
@@ -271,6 +310,9 @@ var loginLink;
 //     // Successful authentication, redirect to secrets.
 //     res.redirect("/secrets");
 //     });
+
+
+
 
 ////////////////////
 //Register Route
@@ -338,13 +380,15 @@ var loginLink;
               yyyy: getDate.getFullYear(),
               usersWithSecrets: foundUsers,
               login: 'PROFILE',
-              loginhref: "profile"
+              loginhref: "profile",
+              admin: admin
             });
           }else {
               res.render("login.ejs", {
                 yyyy: getDate.getFullYear(),
                 login: 'LOGIN',
-                loginhref: "login"
+                loginhref: "login",
+                admin: admin
               });
             }
         }
@@ -355,7 +399,8 @@ var loginLink;
         yyyy: getDate.getFullYear(),
         loginhref: "login",
         login: "LOGIN",
-        loginhref: "profile"
+        loginhref: "profile",
+        admin: admin
         });
     });
     //////////////////////////////////
@@ -393,14 +438,19 @@ var loginLink;
         console.log("fired off User Registration")
         User.register({
           username: req.body.username,
-          fullname: req.body.fullname,
-          passwordConfirm: req.body.passwordConfirm
+          firstname: req.body.fname,
+          lastname: req.body.lname,
+          fullname: req.body.fname + req.body.lname,
+          passwordConfirm: req.body.passwordConfirm,
+          ip: req.ip,
+          joindate: getDate,
+          role: basic
        }, req.body.password,
           function(err, user){
             if (!err) {
               console.log("no errors, authenticating: ");
               passport.authenticate("local")(req,res, function(){
-                res.redirect("/secrets");
+                res.redirect("/");
               });
             } else {
               console.log("some errors, here is some bullshit: ");
@@ -431,7 +481,7 @@ var loginLink;
           console.log(err);
         } else {
           passport.authenticate("local")(req, res, function(){
-            res.redirect("/secrets");
+            res.redirect("/");
           });
         }
       });
@@ -444,17 +494,38 @@ app.get("/login", function(req, res){
     res.render("login", {
       yyyy: getDate.getFullYear(),
           loginhref: "login",
-          login: "LOGIN"});
+          login: "LOGIN",
+        admin: admin});
   });
   /////////////////
   //Profile Route
   //////////////
-app.get("/profile", function(req, res){
+app.get("/profile", checkLogin, function(req, res){
+
     res.render("profile", {
+      ip: req.socket.localAddress,
+      fullname: req.user.fullname,
+      username: req.user.username,
+      role: req.user.role,
+      joindate: req.user.joindate,
+      lastactivedate: req.user.lastactive,
+      lastactivetime: req.user.lastactive,
+      postcount: req.user.blogposts,
+      username: req.user.username,
       yyyy: getDate.getFullYear(),
-          loginhref: "profile",
-          login: "PROFILE"});
+      loginhref: "profile",
+      login: "PROFILE",
+      admin: admin
+    });
   });
+  const secured = (req, res, next) => {
+    if (req.user) {
+      return next();
+    }
+    req.session.returnTo = req.originalUrl;
+    res.redirect("/login");
+  };
+
   /////////////////
   //Blog Route
   //////////////
@@ -466,7 +537,8 @@ app.get("/blog", function(req, res){
       posts: posts,
       loginhref: "profile",
       login: "PROFILE",
-      yyyy: getDate.getFullYear()
+      yyyy: getDate.getFullYear(),
+      admin: admin
       });
   });
 });
@@ -504,7 +576,8 @@ app.get("/language", function(req, res){
       syntaxes: syntaxes,
       login: "PROFILE",
       loginhref: "profile",
-      yyyy: getDate.getFullYear()
+      yyyy: getDate.getFullYear(),
+      admin: admin
       });
   });
 });
@@ -515,7 +588,8 @@ app.get("/apps", function(req, res){
     res.render("apps", {
       yyyy: getDate.getFullYear(),
       loginhref: "login",
-      login: "PROFILE"
+      login: "PROFILE",
+      admin: admin
     });
   });
   /////////////////
@@ -525,8 +599,37 @@ app.get("/templates", function(req, res){
     res.render("templates",{
       yyyy: getDate.getFullYear(),
           loginhref: "login",
-          login: "PROFILE"});
+          login: "PROFILE",
+        admin: admin});
   });
+app.get("/template-nav", function(req, res){
+    res.render("template-nav",{
+      yyyy: getDate.getFullYear(),
+      loginhref: "login",
+      login: "PROFILE",
+    admin: admin});
+    });
+app.get("/template-page", function(req, res){
+    res.render("template-page",{
+      yyyy: getDate.getFullYear(),
+      loginhref: "login",
+      login: "PROFILE",
+      admin: admin});
+    });
+app.get("/template-page-1", function(req, res){
+    res.render("template-page-1",{
+      yyyy: getDate.getFullYear(),
+      loginhref: "login",
+      login: "PROFILE",
+      admin: admin});
+    });
+app.get("/site-overview", function(req, res){
+  res.render("site-overview",{
+    yyyy: getDate.getFullYear(),
+    loginhref: "login",
+    login: "PROFILE",
+    admin: admin});
+});
   /////////////////
   //About
   //////////////
@@ -535,7 +638,8 @@ app.get("/about", function(req, res){
     yyyy: getDate.getFullYear(),
     loginhref: "login",
     login: "PROFILE",
-    aboutContent: "aboutContent"});
+    aboutContent: "aboutContent",
+  admin: admin});
 });
 /////////////////
 //Contact
@@ -545,7 +649,8 @@ app.get("/contact", function(req, res){
     yyyy: getDate.getFullYear(),
     contactContent: contactContent,
     loginhref: "login",
-    login: "PROFILE"});
+    login: "PROFILE",
+  admin: admin});
 });
 ////////////////////////
 //Composing Post route
@@ -557,7 +662,8 @@ app.get("/compose", function(req, res){
   res.render("compose", {
     login: "PROFILE",
     loginhref: "profile",
-    yyyy: getDate.getFullYear()
+    yyyy: getDate.getFullYear(),
+    admin: admin
   });
 });
 app.get("/task", function(req, res){
@@ -565,8 +671,22 @@ app.get("/task", function(req, res){
     login: "PROFILE",
     loginhref: "profile",
     yyyy: getDate.getFullYear(),
-    currentTime: currentTime()
+    currentTime: currentTime(),
+    admin: admin
   });
+});
+app.get("/admin", checkLogin,function(req, res){
+  if (req.isAuthenticated()) {
+    res.render("admin", {
+      login: "PROFILE",
+      loginhref: "profile",
+      yyyy: getDate.getFullYear(),
+      currentTime: currentTime(),
+      admin: admin
+    });
+  }else{
+    res.redirect('/');
+  }
 });
 ////////////////////////////////////////
 // API site examples
@@ -675,7 +795,8 @@ app.get("/compose_syntax", function(req, res){
   res.render("compose_syntax", {
     login: "PROFILE",
     loginhref: "profile",
-    yyyy: getDate.getFullYear()
+    yyyy: getDate.getFullYear(),
+    admin: admin
   });
 });
 ///////////////////////////
@@ -700,7 +821,8 @@ app.get("/compose_post", function(req, res){
         loginhref: "login",
         login: "LOGIN",
         loginhref: "profile",
-        yyyy: getDate.getFullYear()
+        yyyy: getDate.getFullYear(),
+        admin: admin
       });
 //  res.write("Upload from file");
 });
@@ -886,7 +1008,8 @@ const requestedSyntaxId = req.params.syntaxId;
       title: syntax.title,
       content: syntax.content,
       login: "PROFILE",
-      loginhref: "login"
+      loginhref: "login",
+      admin: admin
     });
   });
 
@@ -1052,11 +1175,95 @@ app.post("/test-input", function(req, res){
   res.redirect("/test-input");
 });
 
+//////////////////////////////
+//Twilio
+////////////////////////////
+function twilioMessages(){
+  var i = 0;
+  twilio.messages.each(function(message, done) {
+    console.log(message.sid);
+
+    i++;
+
+    // break after 10 messages
+    if (i >= 10) {
+      done();
+      }
+  });
+}
+
+
+//creates SMS message to the Registered Phone Number using Trial Acct
+function sendTwilioMessage(){
+  client.messages
+    .create({
+      to: '+12896967478',
+      from: '19895755979',
+      body: "Just testing out Twilio ",
+    })
+    .then(message => console.log(message.sid))
+    .done();
+  }
+function  configTwilioMessages(){
+  twilio.messages.each(
+    {limit: 10}, function(message) {
+      console.log(message.sid);
+    });
+  }
+
+  function promise(){
+    twilio.messages.list({limit: 100});
+    promise.then(function(messages) {
+      console.log(messages.length); //=> 125
+      });
+  }
+//sendTwilioMessage;
+
+function eHandler(){
+
+  let user = 'atomdellow@gmail.com'; pass = 'Whitehole1@whiteholE'; service = 'gmail';
+  let transporter = nodemailer.createTransport({
+    service: service,
+    auth: {
+      user: 'atomdellow@gmail.com',
+      pass: 'Whitehole1@whiteholE'
+    },
+    secure: false, // use SSL
+    port: 25, // port for secure SMTP
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+
+  let sender = ''; recipient = 'atomdellow@gmail.com'; subject = 'testing email'; text = 'here is some text!';
+
+  var mailOptions = {
+    from: sender,
+    to: recipient,
+    subject: subject,
+    text: text
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
+
+
+
+
 ///////////////////////
 //App listens on Port
 /////////////////////
 
 //Because Heroku is a little bitch, and is very particular with it's bullshit!
+
+
+
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000;

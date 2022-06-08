@@ -65,7 +65,22 @@
     visibility: hidden;
     font-weight: bold;
   }
+  input[type=text]{
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+     border-radius: 20px;
+     border: 1px solid #2d9fd9;
+     color: #a0d18c;
+     width: 250px;
+     height: 30px;
+     padding-left: 10px;
+    }
 
+input[type=text]:focus {
+     outline: none;
+     border: 1px solid #a0d18c;
+     color: #2d9fd9;
+}
 @media (min-width: 0px) {
   .card-container {
     align-items: start;

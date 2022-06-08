@@ -1,0 +1,26 @@
+<%- include("headerbar"); -%>
+<div class="spacer" style="height:50px;"></div>
+<div class="container d-flex justify-content-center border-downer-radius " style="padding: 10px; background-color: rgba(0,0,0,.5); color: #fff; max-width: 700px;">
+  <a href="/"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" style="padding:10px;" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+  </svg></a>
+  <div class="card text-dark" style="padding:10px;">
+    <h3>How the site was built</h3><br>
+    <p>Zen App was built using Node.Js and Express. It uses MongoDB/Mongoose for the Database, which is an unrelational Database.
+    The site was built from the ground up, including validation, sanitization, login/registering, Blog Content creation, file handling
+   User handling, and deployed onto a cloud server called Heroku.</p><br>
+   <p>Zen App uses Passport, as well as OAuth, however OAuth is currently still being integrated. Additionally, content is served
+   specifically to the role of the account, as well as with a backend dashboard for admins/moderators.</p><br>
+   <p>Using Javascript to create the backend, it's also been used with api's/frameworks such as jQuery and Bootstrap to deliver on the
+   front-end, with a bit of custom, inline CSS.</p><br>
+   <h3>What Apps are being worked on</h3><br>
+   <p>A Task App is top on the list, and is very close to completion. It features a User dashboard for admins who have access to it,
+     which records login times, and tasks that link up to reminders to keep within a Service Level Agreement with the end users
+     to deliver a response inside of that window of time. Additionally the tasks would be linked to a ticket system integrated on
+     the site to allow general site users who have a basic account, to request for help, or notify about a break in the code.
+   This will measure productivity and build a list of tasks that have been completed for historical data.</p><br>
+   <p></p>
+  </div>
+</div>
+
+<%- include("partials/footer"); -%>

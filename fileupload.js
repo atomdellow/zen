@@ -10,7 +10,7 @@ app.use(fileUpload());
 
 app.post("/upload", (req,res) => {
   try {
-    const file = req.files.sampleFile;
+    const file = req.files.file;
     const fileName = file.name;
     const size =  file.data.length;
     const extension = path.extname(fileName);

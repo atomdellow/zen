@@ -15,9 +15,15 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav ">
             <a class="nav-item nav-link" href="/">HOME</a>
-            <a class="nav-item nav-link" href="/apps">APPS</a>
+            <%if (isAuthenticated) {%><a class="nav-item nav-link" href="/apps">APPS</a><%}%>
+
+            <a class="nav-item nav-link" href="/templates">TEMPLATES</a>
             <a class="nav-item nav-link" href="/blog">BLOG</a>
             <a class="nav-item nav-link" href="/about">ABOUT</a>
+
+            <%if (!isAuthenticated) {%><a class="nav-item nav-link" href="/login">Login</a><%}%>
+
+            <%if (isAuthenticated) {%><a class="nav-item nav-link" href="/profile">Profile</a><%}%>
 
           </div>
         </div>

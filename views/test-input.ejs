@@ -16,9 +16,17 @@
         <button class="btn btn-primary" type="submit" name="button" onclick="validationClick();">Submit</button>
         <p id="required" style="color: 'red';"></p>
       </form>
-
     </div>
+    <div class="message">
+      <p id="demo"></p>
+    </div>
+    <canvas id="myCanvas" width="600" height="600">
+
+    </canvas>
     <script type="text/javascript">
+
+      var canvas = document.getElementById("myCanvas");
+      var ctx = canvas.getContext("2d");
       var inputState;
       var sanitized = "&#x2F;&#x2F;Here &amp; is &lt;an&rt; &#x27;example&#x27; of dirt&period;";
       var inputVar = "input";
@@ -50,6 +58,47 @@
         const reg1 = /\&amp;|\&lt;|\&rt;|\&quot;|\&period;|\&#x27;|\&#x2F;/ig;
         document.getElementById(inputVar).value = document.getElementById(inputVar).value.replace(reg1, (match)=>(map[match]));
       }
+
+
+      var c = 0;
+      var direction = 0;
+      async function a(){
+
+        let b = new Promise((resolve)=>{
+          setTimeout(()=>{resolve(a())}, 100)
+        });
+        console.log("current direction: " + direction);
+        if(direction=1){
+          console.log("forward direction");
+          if(c<=10){
+            console.log("growing direction");
+            ctx.fillStyle = "#FF0000";
+            ctx.fillRect(0, 0, c, c);
+            c++;
+          }else{
+            console.log("changed direction");
+            direction=0;
+            console.log(direction);
+          };
+        }else(direction=0){
+          if(c>=0){
+            console.log("fired opposite direction")
+            ctx.fillStyle = "#FF0000";
+            ctx.fillRect(0, 0, c, c);
+            c--;
+          }else{
+            console.log("completed both directions: ");
+            console.log(direction);
+            direction=0;
+          }
+        }
+      }
+        //console.log(await b)
+      }
+      a()
+
+
+
 
       //converts special characters to coded text
 
