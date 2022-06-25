@@ -267,7 +267,7 @@ function checkLogin(req, res, next) {
 // Home Route
 app.get("/", checkLogin, function(req, res){
   try {
-    console.log(req.ip)
+    
     // let userRole = req.user.role
     // let role = req.user.roleObject.values(req.user.role)
     if (req.currentUser) {
